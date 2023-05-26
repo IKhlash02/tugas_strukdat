@@ -8,21 +8,72 @@ const batu_div = document.getElementById("b");
 const kertas_div = document.getElementById("k");
 const gunting_div = document.getElementById("g");
 const resetButton = document.getElementById("reset-button");
+const historyButton = document.getElementById("history-button");
+
+class Node {
+  constructor(value, children = []) {
+    this.value = value;
+    this.children = children;
+  }
+}
+
+const tree = new Node(null, [
+  new Node("g", [new Node("b", [new Node("lose", [], true)]), new Node("k", [new Node("win", [], true)])]),
+  new Node("b", [new Node("g", [new Node("win", [], true)]), new Node("k", [new Node("lose", [], true)])]),
+  new Node("k", [new Node("g", [new Node("lose", [], true)]), new Node("b", [new Node("win", [], true)])]),
+]);
 
 function getComputerChoices() {
-    const choices = ['g', 'b', 'k'];
-    const randomNumber = (Math.floor(Math.random() * 3));
-    return choices[randomNumber];
+  const choices = ["g", "b", "k"];
+  const randomNumber = Math.floor(Math.random() * 3);
+  return choices[randomNumber];
+}
+
+function game(userChoice) {
+  const computerChoice = getComputerChoices();
+
+  const result = traverseTree(tree, userChoice, computerChoice);
+  console.log(result);
+  switch (result) {
+    case "win":
+      win(userChoice, computerChoice);
+      break;
+    case "lose":
+      lose(userChoice, computerChoice);
+      break;
+    default:
+      draw(userChoice, computerChoice);
+      break;
+  }
+}
+
+function traverseTree(node, userChoice, computerChoice) {
+  if (node.children.length === 1) {
+    return node.children[0].value;
+  }
+
+  var childNode;
+  if (node.children.length === 3) {
+    childNode = node.children.find((child) => child.value === userChoice);
+  } else if (node.children.length === 2) {
+    childNode = node.children.find((child) => child.value === computerChoice);
+  }
+
+  if (childNode) {
+    return traverseTree(childNode, userChoice, computerChoice);
+  }
+
+  return null;
 }
 
 let gameHistory = [];
 
 function addToHistory(userChoice, computerChoice, result) {
-    gameHistory.push({
-        userChoice: userChoice,
-        computerChoice: computerChoice,
-        result: result
-    });
+  gameHistory.push({
+    userChoice: userChoice,
+    computerChoice: computerChoice,
+    result: result,
+  });
 }
 
 const historyList = document.getElementById("history-list");
@@ -36,79 +87,62 @@ function displayGameHistory() {
   });
 }
 
-
 function convertKata(letter) {
-    if (letter == "b") return "Batu"
-    if (letter == "g") return "Gunting"
-    if (letter == "k") return "Kertas"
+  if (letter == "b") return "Batu";
+  if (letter == "g") return "Gunting";
+  if (letter == "k") return "Kertas";
 }
 
 function win(userChoice, computerChoice) {
-    userScore++;
-    userScore_span.innerHTML = userScore;
-    computerScore_span.innerHTML = computerScore;
-    result_p.innerHTML = "Doi milih " + convertKata(computerChoice) + ". HORE KAMU MENANG!"
-    addToHistory(userChoice, computerChoice, "win");
+  userScore++;
+  userScore_span.innerHTML = userScore;
+  computerScore_span.innerHTML = computerScore;
+  result_p.innerHTML = "Doi milih " + convertKata(computerChoice) + ". HORE KAMU MENANG!";
+  addToHistory(userChoice, computerChoice, "win");
 }
 
 function lose(userChoice, computerChoice) {
-    computerScore++;
-    userScore_span.innerHTML = userScore;
-    computerScore_span.innerHTML = computerScore;
-    result_p.innerHTML = "Doi milih " + convertKata(computerChoice) + ". YAH KAMU KALAH :("
-    addToHistory(userChoice, computerChoice, "lose");
+  computerScore++;
+  userScore_span.innerHTML = userScore;
+  computerScore_span.innerHTML = computerScore;
+  result_p.innerHTML = "Doi milih " + convertKata(computerChoice) + ". YAH KAMU KALAH :(";
+  addToHistory(userChoice, computerChoice, "lose");
 }
 
 function draw(userChoice, computerChoice) {
-    result_p.innerHTML = "Doi milih " + convertKata(computerChoice) + ". SERI CUYYY!"
-    addToHistory(userChoice, computerChoice, "draw");
+  result_p.innerHTML = "Doi milih " + convertKata(computerChoice) + ". SERI CUYYY!";
+  addToHistory(userChoice, computerChoice, "draw");
 }
 
 function reset() {
-    userScore = 0;
-    computerScore = 0;
-    userScore_span.innerHTML = userScore;
-    computerScore_span.innerHTML = computerScore;
-    result_p.innerHTML = "Mulai Permainan!";
+  userScore = 0;
+  computerScore = 0;
+  userScore_span.innerHTML = userScore;
+  computerScore_span.innerHTML = computerScore;
+  result_p.innerHTML = "Mulai Permainan!";
+  historyList.innerHTML = "";
 }
-
-
-function game(userChoice) {
-    const computerChoice = getComputerChoices();
-    switch (userChoice + computerChoice) {
-        case "gb":
-        case "bk":
-        case "kg":
-            lose(userChoice, computerChoice);
-            break;
-        case "bg":
-        case "kb":
-        case "gk":
-            win(userChoice, computerChoice);
-            break;
-        case "gg":
-        case "bb":
-        case "kk":
-            draw(userChoice, computerChoice);
-            break;
-    }
-}
-
 
 function main() {
-    batu_div.addEventListener('click', function() {
-        game("b");
-    })
-    kertas_div.addEventListener('click', function() {
-        game("k");
-    })
-    gunting_div.addEventListener('click', function() {
-        game("g");
-    })
-    resetButton.addEventListener('click', function() {
-        reset();
-    })
-    
+  batu_div.addEventListener("click", function () {
+    game("b");
+    historyList.innerHTML = "";
+  });
+  kertas_div.addEventListener("click", function () {
+    game("k");
+    historyList.innerHTML = "";
+  });
+  gunting_div.addEventListener("click", function () {
+    game("g");
+
+    historyList.innerHTML = "";
+  });
+  resetButton.addEventListener("click", function () {
+    reset();
+  });
+  historyButton.addEventListener("click", function () {
+    displayGameHistory();
+  });
 }
 
 main();
