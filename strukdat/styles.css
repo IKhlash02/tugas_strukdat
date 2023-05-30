@@ -141,3 +141,17 @@ header > h1 {
   font-weight: bold;
   font-size: 50px;
 }
+
+.column > img,
+.column > #score-board {
+  display: inline-block;
+}
+
+.column > img {
+  width: 200px;
+  margin-left: 150px;
+}
+
+.choice > img {
+  width: 120px;
+}
